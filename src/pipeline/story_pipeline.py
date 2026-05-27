@@ -41,6 +41,7 @@ FRAMEWORK_FILE = WORK_DIR / "output/story_framework/story_framework.json"
 STORY_DIR = WORK_DIR / "output/story_framework"
 CHAR_DIR = WORK_DIR / "data/novel_analysis/characters_merged"
 CHAR_FALLBACK = WORK_DIR / "data/novel_analysis/characters"
+RELATIONSHIP_FILE = WORK_DIR / "output/story_framework/character_relationships.json"
 
 
 def load_env():
@@ -149,7 +150,25 @@ class StoryPipeline:
                 chapter_plan = json.dumps(ch, ensure_ascii=False)
                 break
         
-        # 上一章上下文
+        # 加载关系图谱（称呼约定）
+        address_rules = ""
+        if RELATIONSHIP_FILE.exists():
+            with open(RELATIONSHIP_FILE, "r", encoding="utf-8") as f:
+                rel_graph = json.load(f)
+            address_book = rel_graph.get("address_book", {})
+            # 只取核心角色称呼规则
+            address_lines = []
+            for name, data in address_book.items():
+                calls = []
+                for who, info in data.get("called_by", {}).items():
+                    calls.append(f"{who}→{name}: \"{info['term']}\"")
+                if calls:
+                    address_lines.append(f"- {name}: {', '.join(calls[:5])}")
+            address_rules = "称呼规则：\n" + "\n".join(address_lines[:10])
+            address_rules += "\n- 每个角色只能使用约定的称呼，不得自行创造新称呼"
+        
+        if RELATIONSHIP_FILE.exists():
+            ...
         lc = fw.get("last_chapter_context", {})
         last_summary = lc.get("ending_summary", "未知")
         
@@ -188,6 +207,9 @@ class StoryPipeline:
 ## 角色参考
 {self.char_context[:2000]}
 
+## ⚠️ 称呼约定（严格遵守）
+{address_rules if address_rules else '无特殊约定'}
+
 ## 外部输入
 {'' if not feedback_text else f'用户反馈: {feedback_text}'}
 {'' if not comments_text else f'读者评论倾向: {comments_text}'}
@@ -196,6 +218,7 @@ class StoryPipeline:
 - 2500-4000 字
 - 每章至少体现一次遗忘/记忆机制
 - 结尾留钩子
+- 严格遵守上述称呼约定，每个角色对话时必须使用正确称呼
 - {'若有用户反馈，在合理范围内采纳' if feedback_text else ''}
 - {'参考读者评论倾向调整内容侧重' if comments_text else ''}
 

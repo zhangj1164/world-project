@@ -55,7 +55,8 @@
   },
   "character_reference": {
     "directory": "F:\\Personal\\world-project\\output\\novel_analysis\\characters_merged",
-    "fallback_directory": "F:\\Personal\\world-project\\output\\novel_analysis\\characters"
+    "fallback_directory": "F:\\Personal\\world-project\\output\\novel_analysis\\characters",
+    "relationships_file": "output/story_framework/character_relationships.json"
   },
   "chapter_outline": {
     "chapter_outline": [
