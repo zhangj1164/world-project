@@ -1,0 +1,19 @@
+# 密钥
+.env
+
+# 原小说（版权+体积，不入库）
+data/chunqiu-txt/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 日志
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
