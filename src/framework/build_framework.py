@@ -450,6 +450,23 @@ def generate_sequel_chapter_01(world_data, timeline_data, chapter_summaries=None
                 content = f.read()[:400]
             character_refs += f"\n### {name}\n{content}\n"
     
+    # 加载称呼约定
+    address_rules = ""
+    rel_file = OUTPUT_DIR / "character_relationships.json"
+    if rel_file.exists():
+        with open(rel_file, "r", encoding="utf-8") as f:
+            rel_graph = json.load(f)
+        address_book = rel_graph.get("address_book", {})
+        address_lines = []
+        for name, data in address_book.items():
+            calls = []
+            for who, info in data.get("called_by", {}).items():
+                calls.append(f"{who}→{name}: \"{info['term']}\"")
+            if calls:
+                address_lines.append(f"- {name}: {', '.join(calls[:5])}")
+        address_rules = "称呼规则：\n" + "\n".join(address_lines[:10])
+        address_rules += "\n- 每个角色只能使用约定的称呼，不得自行创造新称呼"
+    
     # 提取最后 5 章作为必须接续的上下文
     last_chapters_context = ""
     if chapter_summaries:
@@ -501,6 +518,9 @@ def generate_sequel_chapter_01(world_data, timeline_data, chapter_summaries=None
 
 ## 主要角色参考（含别名）
 {character_refs[:3000]}
+
+## ⚠️ 称呼约定（严格遵守）
+{address_rules if address_rules else "无"}
 
 ## 创作要求
 1. 第一章必须作为原著最后一章的直接延续，从上一章结尾处接着写
